@@ -1,0 +1,6 @@
+[submodule "analytics-db"]
+	path = analytics-db
+	url = https://github.com/HBPMedical/analytics-db.git
+[submodule "sample-datasets-db"]
+	path = sample-datasets-db
+	url = https://github.com/HBPMedical/sample-datasets-db.git
