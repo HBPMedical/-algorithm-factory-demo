@@ -3,31 +3,33 @@
 
 version: '2'
 services:
-  zookeeper1:
+  zookeeper:
     image: netflixoss/exhibitor:1.5.2
-    hostname: zookeeper1
-    network_mode: "bridge"
+    hostname: zookeeper
+    networks:
+      - mip-backend-bridge
 
-  mesosmaster:
-    image: mesosphere/mesos-master:1.0.1-2.0.93.ubuntu1404
+  mesos_master:
+    image: mesosphere/mesos-master:1.3.0
     hostname: mesosmaster
     volumes:
       - ./log/mesos/master:/var/log/mesos/master:rw
       - ./tmp/mesos/master:/var/tmp/mesos:rw
-    network_mode: "bridge"
+    networks:
+      - mip-backend-bridge
     environment:
       MESOS_PORT: 5050
-      MESOS_ZK: 'zk://zookeeper1:2181/mesos'
+      MESOS_ZK: 'zk://zookeeper:2181/mesos'
       MESOS_QUORUM: '1'
       MESOS_REGISTRY: 'in_memory'
       MESOS_CLUSTER: 'local'
       MESOS_HOSTNAME: 'mesosmaster.docker'
       MESOS_LOG_DIR: '/var/log/mesos/master'
-    links:
-      - zookeeper1
+    depends_on:
+      - zookeeper
 
-  mesosslave:
-    image: mesosphere/mesos-slave:1.0.1-2.0.93.ubuntu1404
+  mesos_slave:
+    image: mesosphere/mesos-slave:1.3.0
     hostname: mesosslave
     privileged: true
     volumes:
@@ -38,9 +40,10 @@ services:
       # /usr/bin/docker is needed if you're running an older docker version
       #- /usr/bin/docker:/usr/bin/docker:r
       - /var/run/docker.sock:/var/run/docker.sock:rw
-    network_mode: "bridge"
+    networks:
+      - mip-backend-bridge
     environment:
-      MESOS_MASTER: 'zk://zookeeper1:2181/mesos'
+      MESOS_MASTER: 'zk://zookeeper:2181/mesos'
       MESOS_PORT: '5051'
       MESOS_LOG_DIR: '/var/log/mesos/slave'
       MESOS_WORK_DIR: '/var/tmp/mesos'
@@ -53,78 +56,142 @@ services:
       MESOS_SWITCH_USER: 0
       # see bug resolution for "Failed to determine the hierarchy where the subsystem freezer is attached" at https://github.com/eBayClassifiedsGroup/PanteraS/issues/142
       MESOS_LAUNCHER: "posix"
-    links:
-     - zookeeper1
-     - mesosmaster
+    depends_on:
+      - zookeeper
+      - mesos_master
 
   chronos:
-    image: mesosphere/chronos:chronos-2.5.0-0.1.20160824153434.ubuntu1404-mesos-1.0.0
-    command: '/usr/bin/chronos run_jar --http_port 4400 --zk_hosts zookeeper1:2181 --master zk://zookeeper1:2181/mesos'
+    image: mesosphere/chronos:chronos-2.5.0-0.1.20170628182950.ubuntu1404-mesos-1.3.0
+    command: '/usr/bin/chronos run_jar --http_port 4400 --zk_hosts zookeeper:2181 --master zk://zookeeper:2181/mesos'
     hostname: chronos
-    network_mode: "bridge"
-    links:
-     - zookeeper1
-     - mesosslave
+    networks:
+      - mip-backend-bridge
+    depends_on:
+      - zookeeper
+      - mesos_slave
 
-  analyticsdb:
-    image: postgres:9.4.5
+  # Expose the database to the host
+  db:
+    image: postgres:9.6.2-alpine
     ports:
-      - "5432"
-    volumes:
-      - ./analytics-db/sql:/docker-entrypoint-initdb.d/
-    network_mode: "bridge"
+      - "5432:5432"
+    hostname: db
+    networks:
+      - mip-backend-bridge
     environment:
       POSTGRES_PASSWORD: test
 
-  sciencedb:
-    image: postgres:9.4.5
-    ports:
-      - "5432"
-    volumes:
-      - ./sample-datasets-db/sql:/docker-entrypoint-initdb.d/
-    network_mode: "bridge"
+  wait_dbs:
+    image: "waisbrot/wait"
+    restart: "no"
+    networks:
+      - mip-backend-bridge
     environment:
-      POSTGRES_PASSWORD: test
+      - TARGETS=db:5432
 
-  metadb:
-    image: postgres:9.4.5
-    ports:
-      - "5432"
-    volumes:
-      - ./sample-datasets-db/meta/sql:/docker-entrypoint-initdb.d/
-    network_mode: "bridge"
+  create_dbs:
+    image: "hbpmip/create-databases:1.0.0"
+    restart: "no"
+    networks:
+      - mip-backend-bridge
     environment:
-      POSTGRES_PASSWORD: test
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_ADMIN_USER: postgres
+      DB_ADMIN_PASSWORD: test
+      DB1: meta
+      USER1: meta
+      PASSWORD1: metapwd
+      DB2: features
+      USER2: features
+      PASSWORD2: featurespwd
+      DB3: woken
+      USER3: woken
+      PASSWORD3: wokenpwd
+      DB4: portal
+      USER4: portal
+      PASSWORD4: portalpwd
+    depends_on:
+      - db
+
+  meta_db_setup:
+    image: "hbpmip/sample-meta-db-setup:40d785c"
+    container_name: "meta-db-setup"
+    restart: "no"
+    networks:
+      - mip-backend-bridge
+    environment:
+      FLYWAY_DBMS: postgresql
+      FLYWAY_HOST: db
+      FLYWAY_PORT: 5432
+      FLYWAY_DATABASE_NAME: meta
+      FLYWAY_USER: postgres
+      FLYWAY_PASSWORD: test
+    depends_on:
+      - db
+
+  sample_db_setup:
+    image: "hbpmip/sample-data-db-setup:xxxx"
+    container_name: "data-db-setup"
+    restart: "no"
+    networks:
+      - mip-backend-bridge
+    environment:
+      FLYWAY_DBMS: postgresql
+      FLYWAY_HOST: db
+      FLYWAY_PORT: 5432
+      FLYWAY_DATABASE_NAME: features
+      FLYWAY_USER: postgres
+      FLYWAY_PASSWORD: test
+    depends_on:
+      - db
+
+  woken_db_setup:
+    image: "hbpmip/woken-db-setup:1.0.1"
+    container_name: "woken-db-setup"
+    restart: "no"
+    networks:
+      - mip-backend-bridge
+    environment:
+      FLYWAY_DBMS: postgresql
+      FLYWAY_HOST: db
+      FLYWAY_PORT: 5432
+      FLYWAY_DATABASE_NAME: woken
+      FLYWAY_USER: postgres
+      FLYWAY_PASSWORD: test
+    depends_on:
+      - db
 
   woken:
-    image: hbpmip/woken:bc3de25
-    hostname: woken
+    # Use the latest image built as this is what is under test
+    image: hbpmip/woken:9902fd1
     volumes:
       - ./woken/config:/opt/woken/config
+      - ./woken/lib:/opt/woken/lib
     ports:
-      - "8087:8087"
-      - "8088:8088"
-    network_mode: "bridge"
-    environment:
-      ANALYTICS_DB_HOST: analyticsdb
-      ANALYTICS_DB_PORT: 5432
-      SAMPLES_DB_HOST: samplesdb
-      SAMPLES_DB_PORT: 5432
-    links:
-     - chronos
-     - analyticsdb
-     - sciencedb
-     - metadb
+      - "8087"
+      - "8088"
+    hostname: woken
+    networks:
+      - mip-backend-bridge
+    depends_on:
+      - chronos
+      - db
+      - woken_db_setup
 
-  wokenvalidation:
-    image: hbpmip/woken-validation:bc3de25
-    hostname: wokenvalidation
+  woken_validation:
+    image: hbpmip/woken-validation:5cdbe42
     volumes:
-      - ./woken-validation/config/application.conf:/opt/woken-validation/config/application.conf
+      - ./woken/config/validation/application.conf:/opt/woken-validation/config/application.conf
     ports:
       - "8082:8082"
-    network_mode: "bridge"
-    links:
+    hostname: woken-validation
+    networks:
+      - mip-backend-bridge
+    depends_on:
       - woken
 
-
+networks:
+  mip-backend-bridge:
+    external:
+      name: algo-demo-bridge
