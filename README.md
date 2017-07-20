@@ -38,8 +38,11 @@ It will also ensure that everything is running correctly by executing a few test
 2. Add your an entry for you algorithm in woken/conf/application.conf in the section defaultSettings.request.functions using the following format
 
 > YOUR_ALGORITHM_NAME = {
+>
 >   image = "YOUR_DOCKER_IMAGE_NAME:YOUR_DOCKER_IMAGE_TAG"
+>
 >   preditictive = true | false
+>
 > }
 
 ## How to create a compliant docker image
