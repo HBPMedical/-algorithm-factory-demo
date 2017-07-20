@@ -16,6 +16,7 @@ Note that it is not meant at all to be used in production mode.
 
 1. Clone the present repository without changing the name of its root directory
 2. Run the script after-git-clone.sh
+
 > ./after-git-clone.shcd w
 
 As it has to download a certain number of docker images form docker hub, it may take a little while... Do 30 push-ups...
@@ -23,6 +24,7 @@ As it has to download a certain number of docker images form docker hub, it may 
 ## How to run a local instance of the Algorithm Factory
 
 1. Simply run the script run.sh
+
 > ./run.sh
 
 On the first run, it has to download a certain number of docker images form docker hub. For that reason it may take a little while... Do 30 push-ups...
@@ -30,17 +32,36 @@ On the first run, it has to download a certain number of docker images form dock
 This script will launch all the required services specified in the underlying docker-compose config file.
 It will also ensure that everything is running correctly by executing a few tests
 
-## How to test your own algorithm
+## How to integrate your own algorithm
 
-1) Create a compliant docker image containing your algorithm by following the steps corresponding to your favourite environment
-
-  a) Java
-  b) Python
-
-2) Add your the name of your algorithm's image in woken/conf/application.conf in the section defaultSettings.request.functions using the following format
+1. Create a compliant docker image containing your algorithm
+2. Add your an entry for you algorithm in woken/conf/application.conf in the section defaultSettings.request.functions using the following format
 
 > YOUR_ALGORITHM_NAME = {
 >   image = "YOUR_DOCKER_IMAGE_NAME:YOUR_DOCKER_IMAGE_TAG"
+>   preditictive = true | false
 > }
 
-...
+## How to create a compliant docker image
+
+### General guidelines
+
+Here are the general specifications that any algorithm's docker image should respect in order to be run inside the Algorithm Factory.
+
+The image should be able to:
+
+- Retrieve tabular data from a feature (SQL) database given a URL and a query string given as environment variables
+- Run an a piece of code (the algorithm) using the retrieved data that produce a tangible output (i.e. statistics, models) 
+- Write the output as a PFA document in another (SQL) database whose URL is also given as an environment variable
+
+*To be continued*
+
+We already provide small frameworks for Java and Python environments. Those are not mandatory, they are only helpers that contributors can choose to use or not.
+
+### Java specifics
+
+*Coming soon*
+
+### Python specifics
+
+*Coming soon*
