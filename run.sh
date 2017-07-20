@@ -35,7 +35,7 @@ network_bridge_name="algo-demo-bridge"
 
 if [ $($DOCKER network ls | grep -c $network_bridge_name) -lt 1 ]; then
   echo "Create $network_bridge_name network..."
-  $DOCKER network $network_bridge_name
+  $DOCKER network create $network_bridge_name
 else
   echo "Found $network_bridge_name network !"
 fi
@@ -51,9 +51,18 @@ echo "Migrate metadata database..."
 $DOCKER_COMPOSE run meta_db_setup
 
 echo "Migrate features database..."
-#$DOCKER_COMPOSE run sample_db_setup
+$DOCKER_COMPOSE run sample_db_setup
+
+echo "Migrate analytics database..."
+$DOCKER_COMPOSE run woken_db_setup
 
 echo "Run containers..."
-$DOCKER_COMPOSE up -d zookeeper mesos_master mesos_slave chronos woken woken_validation backend frontend
+$DOCKER_COMPOSE up -d zookeeper mesos_master mesos_slave chronos woken woken_validation
 
-echo "DONE"
+$DOCKER_COMPOSE run wait_woken
+
+echo "The Algorithm Factory is now running on your system"
+
+echo "Testing deployment..."
+
+/bin/bash ./test.sh

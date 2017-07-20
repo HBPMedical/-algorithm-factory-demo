@@ -15,28 +15,27 @@ Note that it is not meant at all to be used in production mode.
 ## Installation
 
 1. Clone the present repository without changing the name of its root directory
-2. Run after-git-clone.sh script that will update the dependencies.
-> ./after-git-clone.sh
+2. Run the script after-git-clone.sh
+> ./after-git-clone.shcd w
 
 As it has to download a certain number of docker images form docker hub, it may take a little while... Do 30 push-ups...
 
-## How to start everything
+## How to run a local instance of the Algorithm Factory
 
 1. Simply run the script run.sh
 > ./run.sh
 
-This script will simply launch all the required services specified in the underlying docker-compose config file.
+On the first run, it has to download a certain number of docker images form docker hub. For that reason it may take a little while... Do 30 push-ups...
 
-## Test that everything is fine
-
-1. Run the script test.sh
-> ./test.sh
-
-It will try to query a certain number of
+This script will launch all the required services specified in the underlying docker-compose config file.
+It will also ensure that everything is running correctly by executing a few tests
 
 ## How to test your own algorithm
 
-1) Create a docker image for your algorithm by following the steps described here
+1) Create a compliant docker image containing your algorithm by following the steps corresponding to your favourite environment
+
+  a) Java
+  b) Python
 
 2) Add your the name of your algorithm's image in woken/conf/application.conf in the section defaultSettings.request.functions using the following format
 

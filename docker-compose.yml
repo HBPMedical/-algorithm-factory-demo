@@ -108,9 +108,6 @@ services:
       DB3: woken
       USER3: woken
       PASSWORD3: wokenpwd
-      DB4: portal
-      USER4: portal
-      PASSWORD4: portalpwd
     depends_on:
       - db
 
@@ -131,7 +128,7 @@ services:
       - db
 
   sample_db_setup:
-    image: "hbpmip/sample-data-db-setup:xxxx"
+    image: "hbpmip/sample-data-db-setup:0.1.0"
     container_name: "data-db-setup"
     restart: "no"
     networks:
@@ -177,19 +174,39 @@ services:
     depends_on:
       - chronos
       - db
-      - woken_db_setup
 
   woken_validation:
     image: hbpmip/woken-validation:5cdbe42
     volumes:
-      - ./woken/config/validation/application.conf:/opt/woken-validation/config/application.conf
+      - ./woken-validation/config:/opt/woken-validation/config
     ports:
-      - "8082:8082"
+      - "8082"
     hostname: woken-validation
     networks:
       - mip-backend-bridge
     depends_on:
       - woken
+
+  wait_woken:
+    image: "waisbrot/wait"
+    restart: "no"
+    networks:
+      - mip-backend-bridge
+    environment:
+      - TARGETS=woken:8087
+
+  tester:
+    build: ./tester
+    volumes:
+      - ./tests-examples:/root/tests
+    networks:
+      - mip-backend-bridge
+    depends_on:
+      - woken
+
+  # An example of algorithm
+  knn-algorithm:
+    image: hbpmip/java-rapidminer-knn:58e280f
 
 networks:
   mip-backend-bridge:
