@@ -1,8 +1,7 @@
 #!/bin/bash
 
 exit_trap () {
-  local lc="$BASH_COMMAND" rc=$?
-  echo "A test has failed. Please verify that you followed all installation steps correctly." 1>&2
+    [[ $? -eq 0 ]] || echo "A test has failed. Please verify that you followed all installation steps correctly." 1>&2
 }
 
 trap exit_trap EXIT
