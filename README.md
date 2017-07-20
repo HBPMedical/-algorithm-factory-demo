@@ -17,7 +17,7 @@ Note that it is not meant at all to be used in production mode.
 1. Clone the present repository without changing the name of its root directory
 2. Run the script after-git-clone.sh
 
-> ./after-git-clone.shcd w
+> ./after-git-clone.sh
 
 As it has to download a certain number of docker images form docker hub, it may take a little while... Do 30 push-ups...
 
