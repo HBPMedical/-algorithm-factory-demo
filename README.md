@@ -11,6 +11,10 @@ Note that it is not meant at all to be used in production mode.
 2. Install docker-compose ([official documentation](https://docs.docker.com/compose/install/))
 3. Configure any firewall to allow the download of images from Docker hub (https://hub.docker.com)
 4. Add your current user to the docker group
+5. Make sure that docker containers can access internet
+
+Sometimes the containers seem not to be able to access internet. It is usually a DNS lookups problem and can be solved by configuring correctly the docker daemon.
+You can find instructions and tests regarding this issue [here](https://robinwinslow.uk/2016/06/23/fix-docker-networking-dns/#the-permanent-system-wide-fix)
 
 ## Installation
 
