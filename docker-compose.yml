@@ -36,7 +36,7 @@ services:
       - ./log/mesos/slave:/var/log/mesos/slave:rw
       - ./tmp/mesos/slave:/var/tmp/mesos:rw
       - /sys:/sys
-      - /cgroup:/cgroup
+      #- /cgroup:/cgroup is it really needed for the demo? Not compatible with docker machine on MacOSX, try /sys/fs/cgroups...
       # /usr/bin/docker is needed if you're running an older docker version
       #- /usr/bin/docker:/usr/bin/docker:r
       - /var/run/docker.sock:/var/run/docker.sock:rw
