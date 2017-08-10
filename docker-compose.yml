@@ -36,9 +36,6 @@ services:
       - ./log/mesos/slave:/var/log/mesos/slave:rw
       - ./tmp/mesos/slave:/var/tmp/mesos:rw
       - /sys:/sys
-      #- /cgroup:/cgroup is it really needed for the demo? Not compatible with docker machine on MacOSX, try /sys/fs/cgroups...
-      # /usr/bin/docker is needed if you're running an older docker version
-      #- /usr/bin/docker:/usr/bin/docker:r
       - /var/run/docker.sock:/var/run/docker.sock:rw
     networks:
       - mip-backend-bridge
@@ -72,7 +69,7 @@ services:
 
   # Expose the database to the host
   db:
-    image: postgres:9.6.2-alpine
+    image: postgres:9.6.3-alpine
     ports:
       - "5432:5432"
     hostname: db
@@ -160,7 +157,6 @@ services:
       - db
 
   woken:
-    # Use the latest image built as this is what is under test
     image: hbpmip/woken:9902fd1
     volumes:
       - ./woken/config:/opt/woken/config
@@ -196,9 +192,9 @@ services:
       - TARGETS=woken:8087
 
   tester:
-    build: ./tester
-    volumes:
-      - ./tests-examples:/root/tests
+    build:
+      context: .
+      dockerfile: Dockerfile.tester
     networks:
       - mip-backend-bridge
     depends_on:

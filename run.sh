@@ -27,6 +27,8 @@ else
   DOCKER_COMPOSE="sudo docker-compose"
 fi
 
+mkdir -p log tmp
+
 echo "Remove old running containers (if any)..."
 $DOCKER_COMPOSE kill
 $DOCKER_COMPOSE rm -f
@@ -42,6 +44,7 @@ fi
 
 echo "Deploy a Postgres instance and wait for it to be ready..."
 $DOCKER_COMPOSE up -d db
+$DOCKER_COMPOSE build tester
 $DOCKER_COMPOSE run wait_dbs
 
 echo "Create databases..."
