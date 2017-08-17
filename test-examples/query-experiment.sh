@@ -1,10 +1,10 @@
 #!/bin/bash
 
-VERBOSITY=$1
+VERBOSITY=$@
 
-: ${VERBOSITY:--v}
+: ${VERBOSITY:=-pBhb}
 
-http "$VERBOSITY" --timeout 180 POST woken:8087/mining/experiment \
+http "$VERBOSITY" --timeout 180 --json POST woken:8087/mining/experiment \
          variables:='[{"code":"cognitive_task2"}]' \
          grouping:='[]' \
          covariables:='[{"code":"score_test1"}, {"code":"college_math"}]' \
