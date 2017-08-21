@@ -1,0 +1,89 @@
+description: "Demo of the Algorithm Factory"
+
+long_description: |
+  This project helps you to quickly deploy a complete Mesos stack locally as well as an instance of the Algorithm Factory on top of it.
+  It aims at providing a testing/debugging environment for the integration of new algorithms.
+
+  Note that it is not meant at all to be used in production mode.
+
+authors:
+  - author: Arnaud Jutzeler
+    author_email:
+      - arnaud.jutzeler@chuv.ch
+      - arnaud@ahead-solutions.ch
+    organisation:
+      name: LREN-CHUV
+      badge: https://img.shields.io/badge/CHUV-LREN-AF4C64.svg
+      url: https://www.unil.ch/lren/en/home.html
+  - author: Ludovic Claude
+    author_email:
+      - ludovic.claude@chuv.ch
+      - ludovic.claude54@gmail.com
+      - ludovic.claude54@googlemail.com
+    organisation:
+      name: LREN-CHUV
+      badge: https://img.shields.io/badge/CHUV-LREN-AF4C64.svg
+      url: https://www.unil.ch/lren/en/home.html
+
+platform: MIP
+component:
+  mip_building_block: reference
+  nature: docker-image
+
+license:
+  name: Apache 2.0
+  badge: https://img.shields.io/badge/license-Apache--2.0-blue.svg
+  url: https://github.com/LREN-CHUV/algorithm-factory-demo/blob/master/LICENSE
+
+code_repositories:
+  - name: chuv-gitlab/HBPMedical
+    visibility: private
+    url: https://___.chuv.ch/data-factory/algorithm-factory-demo/
+    git_clone: https://___.chuv.ch/data-factory/algorithm-factory-demo.git
+  - name: github/LREN-CHUV
+    visibility: public
+    url: https://github.io/LREN-CHUV/algorithm-factory-demo/
+    git_clone: https://github.io/LREN-CHUV/algorithm-factory-demo.git
+  - name: github/HBPMedical
+    visibility: public
+    url: https://github.io/HBPMedical/algorithm-factory-demo/
+    git_clone: https://github.io/HBPMedical/algorithm-factory-demo.git
+
+code_quality_checks:
+  codacy:
+    badge: https://api.codacy.com/project/badge/Grade/474d2f290fb247cbaa6c220d470f05ba
+    url: "https://www.codacy.com/app/hbp-mip/algorithm-factory-demo?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=LREN-CHUV/algorithm-factory-demo&amp;utm_campaign=Badge_Grade"
+
+testing:
+  unit_testing:
+    sources: .
+    command: ./tesh.sh
+
+release_management:
+  current_version: 0.1.0
+  current_code_release: https://github.com/HBPMedical/algorithm-factory-demo/archive/0.1.0.zip
+  current_docker_release: docker pull hbpmip/algorithm-factory-demo:0.1.0
+  release_script: 'publish.sh'
+
+continuous_integration:
+  - name: CircleCI
+    description: "Check style and execute unit tests"
+    url: https://circleci.com/gh/LREN-CHUV/algorithm-factory-demo
+    badge: https://circleci.com/gh/LREN-CHUV/algorithm-factory-demo.svg?style=svg
+    actions:
+      - code_style
+      - unit_tests
+
+distribution:
+  git:
+    url: https://github.com/HBPMedical/algorithm-factory-demo.git
+
+planning:
+  github:
+    name: Issues on Github
+    url: https://github.com/LREN-CHUV/algorithm-factory-demo/issues
+
+related_projects:
+  - name: woken
+    mip_building_block: algorithm-factory
+    relationship: see-also

@@ -1,3 +1,4 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/474d2f290fb247cbaa6c220d470f05ba)](https://www.codacy.com/app/hbp-mip/algorithm-factory-demo?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=HBPMedical/algorithm-factory-demo&amp;utm_campaign=Badge_Grade)
 
 # Algorithm Factory DEMO
 

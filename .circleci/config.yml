@@ -22,7 +22,7 @@ jobs:
           command: |
             pre-commit run --all-files
       - run:
-          name: "Build the project"
+          name: "Start Woken and the Algorithm Factory runtime"
           command: |
             PATH=$PATH:/$HOME/.captain/bin/ ./run.sh
       - run:
