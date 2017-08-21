@@ -1,3 +1,3 @@
 #!/bin/sh
 
-# Nothing
+[ -x /usr/local/bin/pre-commit ] && pre-commit install

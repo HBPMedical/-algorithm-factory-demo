@@ -1,3 +1,4 @@
+
 # Algorithm Factory DEMO
 
 This project helps you to quickly deploy a complete Mesos stack locally as well as an instance of the Algorithm Factory on top of it.
@@ -27,7 +28,7 @@ As it has to download a certain number of docker images form docker hub, it may 
 
 ## How to run a local instance of the Algorithm Factory
 
-1. Simply run the script run.sh
+1. Execute the script run.sh
 
 > ./run.sh
 
@@ -58,7 +59,7 @@ Here are the general specifications that any algorithm's docker image should res
 The image should be able to:
 
 - Retrieve tabular data from a feature (SQL) database given a URL and a query string given as environment variables
-- Run an a piece of code (the algorithm) using the retrieved data that produce a tangible output (i.e. statistics, models) 
+- Run an a piece of code (the algorithm) using the retrieved data that produce a tangible output (i.e. statistics, models)
 - Write the output as a PFA document in another (SQL) database whose URL is also given as an environment variable
 
 *To be continued*
