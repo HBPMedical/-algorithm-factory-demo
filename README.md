@@ -1,4 +1,4 @@
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/474d2f290fb247cbaa6c220d470f05ba)](https://www.codacy.com/app/hbp-mip/algorithm-factory-demo?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=HBPMedical/algorithm-factory-demo&amp;utm_campaign=Badge_Grade)
+[![CHUV](https://img.shields.io/badge/CHUV-LREN-AF4C64.svg)](https://www.unil.ch/lren/en/home.html) [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/LREN-CHUV/woken-db-setup/blob/master/LICENSE) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/474d2f290fb247cbaa6c220d470f05ba)](https://www.codacy.com/app/hbp-mip/algorithm-factory-demo?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=HBPMedical/algorithm-factory-demo&amp;utm_campaign=Badge_Grade) [![CircleCI](https://circleci.com/gh/HBPMedical/algorithm-factory-demo.svg?style=svg)](https://circleci.com/gh/HBPMedical/algorithm-factory-demo)
 
 # Algorithm Factory DEMO
 
