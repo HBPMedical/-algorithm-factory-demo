@@ -44,6 +44,8 @@ fi
 
 echo "Deploy a Postgres instance and wait for it to be ready..."
 $DOCKER_COMPOSE up -d db
+$DOCKER_COMPOSE build woken
+$DOCKER_COMPOSE build woken_validation
 $DOCKER_COMPOSE build tester
 $DOCKER_COMPOSE run wait_dbs
 
@@ -60,9 +62,7 @@ echo "Migrate analytics database..."
 $DOCKER_COMPOSE run woken_db_setup
 
 echo "Run containers..."
-$DOCKER_COMPOSE up -d zookeeper mesos_master mesos_slave chronos woken
-$DOCKER network inspect algo-demo-bridge
-$DOCKER_COMPOSE up -d woken_validation
+$DOCKER_COMPOSE up -d zookeeper mesos_master mesos_slave chronos woken woken_validation
 
 $DOCKER_COMPOSE run wait_woken
 

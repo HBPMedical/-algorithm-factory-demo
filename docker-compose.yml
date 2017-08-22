@@ -157,10 +157,9 @@ services:
       - db
 
   woken:
-    image: hbpmip/woken:9902fd1
-    volumes:
-      - ./woken/config:/opt/woken/config
-      - ./woken/lib:/opt/woken/lib
+    build:
+      context: .
+      dockerfile: Dockerfile.woken
     ports:
       - "8087"
       - "8088"
@@ -172,9 +171,9 @@ services:
       - db
 
   woken_validation:
-    image: hbpmip/woken-validation:5cdbe42
-    volumes:
-      - ./woken-validation/config:/opt/woken-validation/config
+    build:
+      context: .
+      dockerfile: Dockerfile.woken-validation
     ports:
       - "8082"
     hostname: woken-validation

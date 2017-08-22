@@ -1,0 +1,3 @@
+FROM hbpmip/woken-validation:5cdbe42
+
+COPY woken-validation/config/application.conf /opt/woken-validation/config/
