@@ -189,6 +189,7 @@ services:
       - mip-backend-bridge
     environment:
       - TARGETS=woken:8087
+      - TIMEOUT=60
 
   tester:
     build:
