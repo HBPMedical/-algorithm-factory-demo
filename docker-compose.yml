@@ -84,7 +84,8 @@ services:
     networks:
       - mip-backend-bridge
     environment:
-      - TARGETS=db:5432
+      TARGETS: db:5432
+      TIMEOUT: 60
 
   create_dbs:
     image: "hbpmip/create-databases:1.0.0"
@@ -188,8 +189,8 @@ services:
     networks:
       - mip-backend-bridge
     environment:
-      - TARGETS=woken:8087
-      - TIMEOUT=60
+      TARGETS: woken:8087
+      TIMEOUT: 60
 
   tester:
     build:
