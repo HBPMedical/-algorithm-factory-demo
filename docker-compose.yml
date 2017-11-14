@@ -205,6 +205,9 @@ services:
   knn-algorithm:
     image: hbpmip/java-rapidminer-knn:58e280f
 
+  python-algorithm:
+    image: hbpmip/python-anova:0.3.1
+
 networks:
   mip-backend-bridge:
     external:

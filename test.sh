@@ -34,4 +34,9 @@ echo "Woken Test 4: Run a simple experiment"
 response=$($DOCKER_COMPOSE run --rm tester ./query-experiment.sh -h | grep -o "HTTP.*")
 [[ "$response" == *"OK"* ]] && echo "Successful!" || { echo -e "Failed test 4: \n$response" 1>&2 ; exit 1; }
 
+echo "Woken Test 5: Run a simple algorithm"
+
+response=$($DOCKER_COMPOSE run --rm tester ./query-anova.sh -h | grep -o "HTTP.*")
+[[ "$response" == *"OK"* ]] && echo "Successful!" || { echo -e "Failed test 5:\n$response" 1>&2 ; exit 1; }
+
 echo "Everything seems to work just fine! Congrats!"
