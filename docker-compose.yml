@@ -208,6 +208,9 @@ services:
   python-algorithm:
     image: hbpmip/python-anova:0.3.1
 
+  icm-algorithm:
+    image: icm_hbp:latest
+
 networks:
   mip-backend-bridge:
     external:
