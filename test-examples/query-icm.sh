@@ -9,4 +9,4 @@ http "$VERBOSITY" --timeout 180 --json POST woken:8087/mining/job \
          grouping:='[]' \
          covariables:='[{"code":"score_math_course1"}]' \
          filters:='""' \
-         algorithm:='{"code":"icm_hbp", "name": "ICM", "parameters": []}'
+         algorithm:='{"code":"icm", "name": "ICM", "parameters": []}'
