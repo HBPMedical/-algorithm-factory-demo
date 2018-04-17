@@ -1,13 +1,28 @@
 # Configuration taken from https://github.com/meltwater/docker-mesos
 # https://github.com/containous/traefik/blob/master/examples/compose-marathon.yml
 
-version: '2'
+version: '3.0'
 services:
   zookeeper:
-    image: netflixoss/exhibitor:1.5.2
+    image: zookeeper:3.4.11
     hostname: zookeeper
-    networks:
-      - mip-backend-bridge
+    ports:
+      - '2181:2181'
+      - '2888:2888'
+      - '3888:3888'
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=zookeeper:2888:3888
+    restart: always
+
+  wait_zookeeper:
+    image: "waisbrot/wait"
+    restart: "no"
+    environment:
+      TARGETS: "zookeeper:2181"
+      TIMEOUT: 60
+    depends_on:
+      - zookeeper
 
   mesos_master:
     image: mesosphere/mesos-master:1.3.0
@@ -15,8 +30,6 @@ services:
     volumes:
       - ./log/mesos/master:/var/log/mesos/master:rw
       - ./tmp/mesos/master:/var/tmp/mesos:rw
-    networks:
-      - mip-backend-bridge
     environment:
       MESOS_PORT: 5050
       MESOS_ZK: 'zk://zookeeper:2181/mesos'
@@ -25,8 +38,18 @@ services:
       MESOS_CLUSTER: 'local'
       MESOS_HOSTNAME: 'mesosmaster.docker'
       MESOS_LOG_DIR: '/var/log/mesos/master'
+      MESOS_WORK_DIR: '/var/lib/mesos'
     depends_on:
       - zookeeper
+
+  wait_mesos_master:
+    image: "waisbrot/wait"
+    restart: "no"
+    environment:
+      TARGETS: "mesos_master:5050"
+      TIMEOUT: 60
+    depends_on:
+      - mesos_master
 
   mesos_slave:
     image: mesosphere/mesos-slave:1.3.0
@@ -36,9 +59,10 @@ services:
       - ./log/mesos/slave:/var/log/mesos/slave:rw
       - ./tmp/mesos/slave:/var/tmp/mesos:rw
       - /sys:/sys
+      #- /cgroup:/cgroup is it really needed for the demo? Not compatible with docker machine on MacOSX, try /sys/fs/cgroups...
+      # /usr/bin/docker is needed if you're running an older docker version
+      #- /usr/bin/docker:/usr/bin/docker:r
       - /var/run/docker.sock:/var/run/docker.sock:rw
-    networks:
-      - mip-backend-bridge
     environment:
       MESOS_MASTER: 'zk://zookeeper:2181/mesos'
       MESOS_PORT: '5051'
@@ -58,14 +82,28 @@ services:
       - mesos_master
 
   chronos:
-    image: mesosphere/chronos:chronos-2.5.0-0.1.20170628182950.ubuntu1404-mesos-1.3.0
-    command: '/usr/bin/chronos run_jar --http_port 4400 --zk_hosts zookeeper:2181 --master zk://zookeeper:2181/mesos'
+    image: mesosphere/chronos:v3.0.2
+    command: '--zk_hosts zookeeper:2181 --master zk://zookeeper:2181/mesos --zk_timeout 30000'
+    restart: "always"
     hostname: chronos
-    networks:
-      - mip-backend-bridge
+    ports:
+      - "4400:4400"
+      - "4401:4401"
+    environment:
+      PORT0: 4400
+      PORT1: 4401
     depends_on:
       - zookeeper
       - mesos_slave
+
+  wait_chronos:
+    image: "waisbrot/wait"
+    restart: "no"
+    environment:
+      TARGETS: "chronos:4400"
+      TIMEOUT: 60
+    depends_on:
+      - chronos
 
   # Expose the database to the host
   db:
@@ -73,25 +111,21 @@ services:
     ports:
       - "5432:5432"
     hostname: db
-    networks:
-      - mip-backend-bridge
     environment:
       POSTGRES_PASSWORD: test
 
   wait_dbs:
     image: "waisbrot/wait"
     restart: "no"
-    networks:
-      - mip-backend-bridge
     environment:
-      TARGETS: db:5432
+      TARGETS: "db:5432"
       TIMEOUT: 60
+    depends_on:
+      - db
 
   create_dbs:
     image: "hbpmip/create-databases:1.0.0"
     restart: "no"
-    networks:
-      - mip-backend-bridge
     environment:
       DB_HOST: db
       DB_PORT: 5432
@@ -109,14 +143,11 @@ services:
     depends_on:
       - db
 
-  meta_db_setup:
+  sample_meta_db_setup:
     image: "hbpmip/sample-meta-db-setup:0.6.0"
-    container_name: "meta-db-setup"
+    container_name: "sample-meta-db-setup"
     restart: "no"
-    networks:
-      - mip-backend-bridge
     environment:
-      FLYWAY_DBMS: postgresql
       FLYWAY_HOST: db
       FLYWAY_PORT: 5432
       FLYWAY_DATABASE_NAME: meta
@@ -125,14 +156,11 @@ services:
     depends_on:
       - db
 
-  sample_db_setup:
+  sample_data_db_setup:
     image: "hbpmip/sample-data-db-setup:0.6.0"
-    container_name: "data-db-setup"
+    container_name: "sample-data-db-setup"
     restart: "no"
-    networks:
-      - mip-backend-bridge
     environment:
-      FLYWAY_DBMS: postgresql
       FLYWAY_HOST: db
       FLYWAY_PORT: 5432
       FLYWAY_DATABASE_NAME: features
@@ -145,10 +173,7 @@ services:
     image: "hbpmip/woken-db-setup:1.0.2"
     container_name: "woken-db-setup"
     restart: "no"
-    networks:
-      - mip-backend-bridge
     environment:
-      FLYWAY_DBMS: postgresql
       FLYWAY_HOST: db
       FLYWAY_PORT: 5432
       FLYWAY_DATABASE_NAME: woken
@@ -162,50 +187,76 @@ services:
       context: .
       dockerfile: Dockerfile.woken
     ports:
-      - "8087"
-      - "8088"
-    hostname: woken
-    networks:
-      - mip-backend-bridge
+      - "8087:8087"
+      - "8088:8088"
+      - "9095:9095"
+      - "8000:8000"
+    environment:
+      CLUSTER_PORT: 8088
+      CLUSTER_IP: woken
+      WOKEN_PORT_8088_TCP_ADDR: woken
+      DOCKER_BRIDGE_NETWORK: "algorithm_factory_demo_default"
+      LOG_LEVEL: DEBUG
+      KAMON_ENABLED: "yes"
+      ZIPKIN_ENABLED: "yes"
+      PROMETHEUS_ENABLED: "yes"
+      SIGAR_SYSTEM_METRICS: "no"
+      JVM_SYSTEM_METRICS: "no"
     depends_on:
       - chronos
       - db
 
-  woken_validation:
-    build:
-      context: .
-      dockerfile: Dockerfile.woken-validation
-    ports:
-      - "8082"
-    hostname: woken-validation
-    networks:
-      - mip-backend-bridge
-    depends_on:
-      - woken
-
   wait_woken:
     image: "waisbrot/wait"
     restart: "no"
-    networks:
-      - mip-backend-bridge
     environment:
-      TARGETS: woken:8087
+      TARGETS: "woken:8087,chronos:4400"
       TIMEOUT: 60
+    depends_on:
+      - woken
+      - chronos
+
+  wokenvalidation:
+    image: hbpmip/woken-validation:2.4.5
+    ports:
+      - "8081:8081"
+      - "8082:8082"
+    environment:
+      CLUSTER_PORT: 8082
+      CLUSTER_IP: wokenvalidation
+      WOKEN_PORT_8088_TCP_ADDR: woken
+      LOG_LEVEL: DEBUG
+    depends_on:
+      - woken
+
+  wait_wokenvalidation:
+    image: "waisbrot/wait"
+    restart: "no"
+    environment:
+      TARGETS: "wokenvalidation:8081"
+      TIMEOUT: 60
+    depends_on:
+      - woken
+      - chronos
 
   tester:
     build:
       context: .
       dockerfile: Dockerfile.tester
-    networks:
-      - mip-backend-bridge
+    environment:
+      CLUSTER_PORT: 8197
+      CLUSTER_IP: wokentest
+      WOKEN_PORT_8088_TCP_ADDR: woken
     depends_on:
       - woken
 
   # An example of algorithm
   knn-algorithm:
-    image: hbpmip/java-rapidminer-knn:58e280f
+    image: hbpmip/python-knn:0.1.1
 
 networks:
-  mip-backend-bridge:
-    external:
-      name: algo-demo-bridge
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.30.0/16
