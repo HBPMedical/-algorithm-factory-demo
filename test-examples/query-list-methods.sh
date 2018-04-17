@@ -4,4 +4,4 @@ VERBOSITY=$@
 
 : ${VERBOSITY:=-pBhb}
 
-http "$VERBOSITY" --timeout 180 --json GET woken:8087/mining/list-methods
+http "$VERBOSITY" --verify=no -a admin:WoKeN --timeout 180 --json GET woken:8087/mining/methods

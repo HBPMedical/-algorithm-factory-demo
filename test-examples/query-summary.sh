@@ -4,9 +4,10 @@ VERBOSITY=$@
 
 : ${VERBOSITY:=-pBhb}
 
-http "$VERBOSITY" --timeout 180 --json POST woken:8087/mining/job \
+http "$VERBOSITY" --verify=no -a admin:WoKeN --timeout 180 --json POST woken:8087/mining/job \
+         user:='{"code":"user1"}' \
          variables:='[{"code":"stress_before_test1"}]' \
          grouping:='[]' \
          covariables:='[{"code":"score_test1"}]' \
-         filters:='""' \
+         targetTable='sample_data' \
          algorithm:='{"code":"statisticsSummary", "name": "Statistics Summary", "parameters": []}'

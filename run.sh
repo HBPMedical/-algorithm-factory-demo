@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+#
+# Start Woken and its full environment
+#
+
 set -e
 
 get_script_dir () {
@@ -19,7 +23,7 @@ cd "$(get_script_dir)"
 if [[ $NO_SUDO || -n "$CIRCLECI" ]]; then
   DOCKER="docker"
   DOCKER_COMPOSE="docker-compose"
-elif groups $USER | grep &>/dev/null '\bdocker\b'; then
+elif groups "$USER" | grep &>/dev/null '\bdocker\b'; then
   DOCKER="docker"
   DOCKER_COMPOSE="docker-compose"
 else
@@ -33,38 +37,46 @@ echo "Remove old running containers (if any)..."
 $DOCKER_COMPOSE kill
 $DOCKER_COMPOSE rm -f
 
-network_bridge_name="algo-demo-bridge"
-
-if [ $($DOCKER network ls | grep -c $network_bridge_name) -lt 1 ]; then
-  echo "Create $network_bridge_name network..."
-  $DOCKER network create $network_bridge_name
-else
-  echo "Found $network_bridge_name network !"
-fi
-
-echo "Deploy a Postgres instance and wait for it to be ready..."
+echo "Deploy a Postgres server and wait for it to be ready..."
 $DOCKER_COMPOSE up -d db
 $DOCKER_COMPOSE build woken
-$DOCKER_COMPOSE build woken_validation
+$DOCKER_COMPOSE build wokenvalidation
 $DOCKER_COMPOSE build tester
 $DOCKER_COMPOSE run wait_dbs
 
 echo "Create databases..."
 $DOCKER_COMPOSE run create_dbs
 
-echo "Migrate metadata database..."
-$DOCKER_COMPOSE run meta_db_setup
-
-echo "Migrate features database..."
-$DOCKER_COMPOSE run sample_db_setup
-
-echo "Migrate analytics database..."
+echo "Migrate woken database..."
 $DOCKER_COMPOSE run woken_db_setup
 
-echo "Run containers..."
-$DOCKER_COMPOSE up -d zookeeper mesos_master mesos_slave chronos woken woken_validation
+echo "Migrate metadata database..."
+$DOCKER_COMPOSE run sample_meta_db_setup
 
+echo "Migrate features database..."
+$DOCKER_COMPOSE run sample_data_db_setup
+
+echo "Run containers..."
+for i in 1 2 3 4 5 ; do
+  $DOCKER_COMPOSE up -d chronos
+  $DOCKER_COMPOSE run wait_chronos
+  $DOCKER_COMPOSE logs chronos | grep java.util.concurrent.TimeoutException || break
+  echo "Chronos failed to start, restarting..."
+  $DOCKER_COMPOSE stop chronos
+done
+
+$DOCKER_COMPOSE up -d woken
 $DOCKER_COMPOSE run wait_woken
+$DOCKER_COMPOSE up -d wokenvalidation
+$DOCKER_COMPOSE run wait_wokenvalidation
+
+for i in 1 2 3 4 5 ; do
+  $DOCKER_COMPOSE logs chronos | grep java.util.concurrent.TimeoutException || break
+  echo "Chronos failed to start, restarting..."
+  $DOCKER_COMPOSE stop chronos
+  $DOCKER_COMPOSE up -d chronos
+  $DOCKER_COMPOSE run wait_chronos
+done
 
 echo "The Algorithm Factory is now running on your system"
 

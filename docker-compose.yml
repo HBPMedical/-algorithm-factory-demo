@@ -195,7 +195,7 @@ services:
       CLUSTER_PORT: 8088
       CLUSTER_IP: woken
       WOKEN_PORT_8088_TCP_ADDR: woken
-      DOCKER_BRIDGE_NETWORK: "algorithm_factory_demo_default"
+      DOCKER_BRIDGE_NETWORK: "algorithmfactorydemo_default"
       LOG_LEVEL: DEBUG
       KAMON_ENABLED: "yes"
       ZIPKIN_ENABLED: "yes"
@@ -252,7 +252,7 @@ services:
 
   # An example of algorithm
   knn-algorithm:
-    image: hbpmip/python-knn:0.1.1
+    image: hbpmip/python-knn:0.2.2
 
 networks:
   default:
