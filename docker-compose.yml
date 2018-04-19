@@ -217,7 +217,7 @@ services:
       - chronos
 
   wokenvalidation:
-    image: hbpmip/woken-validation:2.4.5
+    image: hbpmip/woken-validation:2.4.6
     ports:
       - "8081:8081"
       - "8082:8082"
@@ -259,4 +259,4 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.18.30.0/16
+        - subnet: 172.18.30.0/24
