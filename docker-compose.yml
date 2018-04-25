@@ -252,7 +252,7 @@ services:
 
   # An example of algorithm
   knn-algorithm:
-    image: hbpmip/python-knn:0.2.3
+    image: hbpmip/python-knn:0.3.0
 
 networks:
   default:
