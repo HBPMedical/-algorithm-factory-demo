@@ -157,7 +157,7 @@ services:
       - db
 
   sample_data_db_setup:
-    image: "hbpmip/sample-data-db-setup:0.6.0"
+    image: "hbpmip/sample-data-db-setup:0.6.1"
     container_name: "sample-data-db-setup"
     restart: "no"
     environment:
@@ -217,7 +217,7 @@ services:
       - chronos
 
   wokenvalidation:
-    image: hbpmip/woken-validation:2.4.10
+    image: hbpmip/woken-validation:2.4.11
     ports:
       - "8081:8081"
       - "8082:8082"
