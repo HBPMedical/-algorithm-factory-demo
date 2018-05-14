@@ -217,7 +217,7 @@ services:
       - chronos
 
   wokenvalidation:
-    image: hbpmip/woken-validation:2.4.11
+    image: hbpmip/woken-validation:2.5.0
     ports:
       - "8081:8081"
       - "8082:8082"
@@ -252,7 +252,7 @@ services:
 
   # An example of algorithm
   knn-algorithm:
-    image: hbpmip/python-knn:0.3.1
+    image: hbpmip/python-knn:0.3.2
 
 networks:
   default:
